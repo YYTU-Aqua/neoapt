@@ -1,0 +1,37 @@
+#!/bin/bash
+
+# Usage: neoapt [option] [package (or repository)]
+#
+# Option:
+#   do         do the specified program
+#   install     install the specified package
+#   update         update packages information(No need to specify a package)
+#   add-apt-repository     add the specified a repository
+#   search         search the specified package
+#   autoremove     apt autoremove
+#   remove         remove the specified package
+#   purge     remove the specified package and config files
+
+help() {
+  awk 'NR==3,/^$/{if (sub("^# ?","")) print}' $0
+}
+
+if [[ $1 = --help ]]; then
+	help
+else
+	xhost +local:
+	#chroot setting
+	mount -t proc /proc /opt/neoapt/image/proc
+	mount -o bind /sys /opt/neoapt/image/sys
+	mount -o bind /dev /opt/neoapt/image/dev
+	cp --dereference /etc/resolv.conf /opt/neoapt/image/etc/
+	chroot /opt/neoapt/image ./neoapt2.sh $1 $2 $DISPLAY
+
+	#deleting chroot setting
+	umount /opt/neoapt/image/proc
+	umount /opt/neoapt/image/sys
+	umount /opt/neoapt/image/dev
+	rm /opt/neoapt/image/etc/resolv.conf
+fi
+
+echo "Thank you for using! neoapt was made by @atmarx_D1saster"
